@@ -17,7 +17,7 @@
  *   - VHS: brew install vhs
  */
 
-const { exec, execSync } = require('child_process');
+const { execFile, execSync } = require('child_process');
 const { readdirSync, statSync, existsSync, readFileSync, renameSync, writeFileSync, chmodSync, mkdirSync, rmSync } = require('fs');
 const { join, relative, dirname } = require('path');
 
@@ -186,7 +186,7 @@ function runVhs(tapeFile, wrappedPath) {
   return new Promise((resolve) => {
     const startTime = Date.now();
 
-    exec(`vhs ${relativePath}`, {
+    execFile('vhs', [relativePath], {
       cwd: rootDir,
       timeout: 600000,
       env: { ...process.env, PATH: wrappedPath }
