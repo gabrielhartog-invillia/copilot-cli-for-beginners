@@ -4,7 +4,7 @@ from dataclasses import dataclass, asdict
 from typing import List, Optional
 
 DATA_FILE = "data.json"
-_SUSPICIOUS_INPUT_PATTERN = re.compile(r"[;&|`$><\[\]\(\)\n\r\x00]")
+_SUSPICIOUS_INPUT_PATTERN = re.compile(r"[;&|`$><\[\]()\t\n\r\x00]")
 
 
 @dataclass
