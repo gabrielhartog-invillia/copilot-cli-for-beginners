@@ -71,7 +71,8 @@ def test_find_by_author_rejects_suspicious_input():
     collection = BookCollection()
     collection.add_book("Dune", "Frank Herbert", 1965)
 
-    assert collection.find_by_author("Frank Herbert; ls") == []
+    with pytest.raises(ValueError, match="invalid characters"):
+        collection.find_by_author("Frank Herbert; ls")
     assert [book.title for book in collection.find_by_author("Frank Herbert")] == ["Dune"]
 
 
@@ -79,5 +80,6 @@ def test_find_book_by_title_rejects_suspicious_input():
     collection = BookCollection()
     collection.add_book("1984", "George Orwell", 1949)
 
-    assert collection.find_book_by_title("1984; cat /etc/passwd") is None
+    with pytest.raises(ValueError, match="invalid characters"):
+        collection.find_book_by_title("1984; cat /etc/passwd")
     assert collection.find_book_by_title("1984").title == "1984"

@@ -4,7 +4,7 @@ from dataclasses import dataclass, asdict
 from typing import List, Optional
 
 DATA_FILE = "data.json"
-_SUSPICIOUS_INPUT_PATTERN = re.compile(r"[;&|`$><\[\]\t\n\r\x00]")
+_SUSPICIOUS_INPUT_PATTERN = re.compile(r"[;&|`$><\"'\\{}*?\[\]\t\n\r\x00]")
 
 
 @dataclass
@@ -49,10 +49,9 @@ class BookCollection:
         return self.books
 
     def find_book_by_title(self, title: str) -> Optional[Book]:
-        if _SUSPICIOUS_INPUT_PATTERN.search(title):
-            return None
+        safe_title = self._validate_text_input(title, "title")
         for book in self.books:
-            if book.title.lower() == title.lower():
+            if book.title.lower() == safe_title.lower():
                 return book
         return None
 
@@ -75,9 +74,8 @@ class BookCollection:
 
     def find_by_author(self, author: str) -> List[Book]:
         """Find all books by a given author."""
-        if _SUSPICIOUS_INPUT_PATTERN.search(author):
-            return []
-        return [b for b in self.books if b.author.lower() == author.lower()]
+        safe_author = self._validate_text_input(author, "author")
+        return [b for b in self.books if b.author.lower() == safe_author.lower()]
 
     @staticmethod
     def _validate_text_input(value: str, field_name: str) -> str:
