@@ -80,3 +80,4 @@ def test_find_book_by_title_rejects_suspicious_input():
     collection.add_book("1984", "George Orwell", 1949)
 
     assert collection.find_book_by_title("1984; cat /etc/passwd") is None
+    assert collection.find_book_by_title("1984").title == "1984"
