@@ -72,3 +72,4 @@ def test_find_by_author_rejects_suspicious_input():
     collection.add_book("Dune", "Frank Herbert", 1965)
 
     assert collection.find_by_author("Frank Herbert; ls") == []
+    assert [book.title for book in collection.find_by_author("Frank Herbert")] == ["Dune"]
