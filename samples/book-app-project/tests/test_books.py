@@ -73,3 +73,10 @@ def test_find_by_author_rejects_suspicious_input():
 
     assert collection.find_by_author("Frank Herbert; ls") == []
     assert [book.title for book in collection.find_by_author("Frank Herbert")] == ["Dune"]
+
+
+def test_find_book_by_title_rejects_suspicious_input():
+    collection = BookCollection()
+    collection.add_book("1984", "George Orwell", 1949)
+
+    assert collection.find_book_by_title("1984; cat /etc/passwd") is None
