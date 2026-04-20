@@ -4,6 +4,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import pytest
 import books
+import history as history_module
+from history import HistoryLog
 from books import BookCollection
 
 
@@ -13,6 +15,13 @@ def use_temp_data_file(tmp_path, monkeypatch):
     temp_file = tmp_path / "data.json"
     temp_file.write_text("[]")
     monkeypatch.setattr(books, "DATA_FILE", str(temp_file))
+
+
+@pytest.fixture(autouse=True)
+def use_temp_history_file(tmp_path, monkeypatch):
+    """Redirect HistoryLog to a temporary file for each test."""
+    temp_file = tmp_path / "history.json"
+    monkeypatch.setattr(history_module.HistoryLog, "HISTORY_FILE", str(temp_file))
 
 
 def test_add_book():
@@ -91,3 +100,48 @@ def test_find_by_author_multiple_results():
     collection.add_book("Dune", "Frank Herbert", 1965)
     results = collection.find_by_author("Orwell")
     assert len(results) == 2
+
+
+def test_edit_book_author():
+    collection = BookCollection()
+    collection.add_book("1984", "George Orwell", 1949)
+    result = collection.edit_book("1984", author="Eric Arthur Blair")
+    assert result is True
+    book = collection.find_book_by_title("1984")
+    assert book.author == "Eric Arthur Blair"
+
+
+def test_edit_book_year():
+    collection = BookCollection()
+    collection.add_book("Dune", "Frank Herbert", 1965)
+    result = collection.edit_book("Dune", year=1966)
+    assert result is True
+    book = collection.find_book_by_title("Dune")
+    assert book.year == 1966
+
+
+def test_edit_book_multiple_fields():
+    collection = BookCollection()
+    collection.add_book("The Hobbit", "J.R.R. Tolkien", 1937)
+    result = collection.edit_book("The Hobbit", author="John R. R. Tolkien", year=1938)
+    assert result is True
+    book = collection.find_book_by_title("The Hobbit")
+    assert book.author == "John R. R. Tolkien"
+    assert book.year == 1938
+
+
+def test_edit_book_not_found():
+    collection = BookCollection()
+    result = collection.edit_book("Nonexistent Book", author="Nobody")
+    assert result is False
+
+
+def test_edit_book_persists():
+    collection = BookCollection()
+    collection.add_book("Brave New World", "Aldous Huxley", 1932)
+    collection.edit_book("Brave New World", author="A. Huxley", year=1933)
+    reloaded = BookCollection()
+    book = reloaded.find_book_by_title("Brave New World")
+    assert book is not None
+    assert book.author == "A. Huxley"
+    assert book.year == 1933

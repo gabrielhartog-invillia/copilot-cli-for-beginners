@@ -1,6 +1,8 @@
 import json
 from dataclasses import dataclass, asdict
 from typing import List, Optional
+from history import HistoryLog
+from history import HistoryLog
 
 DATA_FILE = "data.json"
 
@@ -39,6 +41,7 @@ class BookCollection:
         book = Book(title=title, author=author, year=year)
         self.books.append(book)
         self.save_books()
+        HistoryLog().record("added", title)
         return book
 
     def list_books(self) -> List[Book]:
@@ -64,9 +67,42 @@ class BookCollection:
         if book:
             self.books.remove(book)
             self.save_books()
+            HistoryLog().record("deleted", title)
             return True
         return False
 
     def find_by_author(self, author: str) -> List[Book]:
         """Find all books by a given author (supports partial, case-insensitive match)."""
         return [b for b in self.books if author.lower() in b.author.lower()]
+
+    def edit_book(self, title: str, **fields) -> bool:
+        """Edit fields (title, author, year, read) of an existing book. Returns True if found."""
+        book = self.find_book_by_title(title)
+        if not book:
+            return False
+        changes = {}
+        for field, value in fields.items():
+            if hasattr(book, field):
+                changes[field] = {"from": getattr(book, field), "to": value}
+                setattr(book, field, value)
+        self.save_books()
+        HistoryLog().record("edit", book.title, changes)
+        return True
+
+    def edit_book(self, title: str, **fields) -> bool:
+        """Edit fields of an existing book. Allowed fields: title, author, year, read."""
+        book = self.find_book_by_title(title)
+        if not book:
+            return False
+        allowed = {"title", "author", "year", "read"}
+        changes = {}
+        for field, new_value in fields.items():
+            if field not in allowed:
+                continue
+            old_value = getattr(book, field)
+            if old_value != new_value:
+                changes[field] = {"before": old_value, "after": new_value}
+                setattr(book, field, new_value)
+        self.save_books()
+        HistoryLog().record("edited", title, changes)
+        return True

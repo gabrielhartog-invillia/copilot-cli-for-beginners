@@ -1,5 +1,7 @@
 import sys
 from books import BookCollection
+from history import HistoryLog
+from history_export import export_to_csv
 
 
 # Global collection instance
@@ -59,6 +61,89 @@ def handle_find():
     show_books(books)
 
 
+def handle_edit():
+    print("\nEdit a Book\n")
+    title = input("Title of the book to edit: ").strip()
+    print("Leave blank to keep current value.")
+    author = input("New author: ").strip()
+    year_str = input("New year: ").strip()
+
+    fields = {}
+    if author:
+        fields["author"] = author
+    if year_str:
+        try:
+            fields["year"] = int(year_str)
+        except ValueError:
+            print("Invalid year. Skipping.")
+
+    if not fields:
+        print("No changes provided.")
+        return
+
+    result = collection.edit_book(title, **fields)
+    if result:
+        print("\nBook updated successfully.\n")
+    else:
+        print("\nBook not found.\n")
+
+
+def handle_history(args):
+    history = HistoryLog()
+
+    if args and args[0] == "clear":
+        confirm = input("Are you sure you want to clear history? [y/N] ").strip().lower()
+        if confirm == "y":
+            history.clear()
+            print("History cleared.")
+        else:
+            print("Cancelled.")
+        return
+
+    filter_type = None
+    filter_book = None
+    export_format = None
+
+    i = 0
+    while i < len(args):
+        if args[i] == "--filter" and i + 1 < len(args):
+            filter_type = args[i + 1]
+            i += 2
+        elif args[i] == "--book" and i + 1 < len(args):
+            filter_book = args[i + 1]
+            i += 2
+        elif args[i] == "--export" and i + 1 < len(args):
+            export_format = args[i + 1]
+            i += 2
+        else:
+            i += 1
+
+    events = history.load()
+
+    if filter_type:
+        events = [e for e in events if e.get("event") == filter_type]
+    if filter_book:
+        events = [e for e in events if e.get("title", "").lower() == filter_book.lower()]
+
+    if export_format == "csv":
+        export_to_csv(events, "history_export.csv")
+        print("History exported to history_export.csv")
+        return
+
+    if not events:
+        print("No history found.")
+        return
+
+    print("\nHistory:\n")
+    for e in events:
+        changes_str = ""
+        if e.get("changes"):
+            parts = [f"{k}: \"{v['before']}\" → \"{v['after']}\"" for k, v in e["changes"].items()]
+            changes_str = " — " + ", ".join(parts)
+        print(f"[{e['timestamp']}] {e['event']}: \"{e['title']}\"{changes_str}")
+    print()
+
+
 def show_help():
     print("""
 Book Collection Helper
@@ -68,6 +153,12 @@ Commands:
   add      - Add a new book
   remove   - Remove a book by title
   find     - Find books by author
+  edit     - Edit a book's details
+  history  - Show history of changes
+             --filter added|edited|deleted
+             --book "Title"
+             --export csv
+             clear  (clears the history log)
   help     - Show this help message
 """)
 
@@ -87,6 +178,10 @@ def main():
         handle_remove()
     elif command == "find":
         handle_find()
+    elif command == "edit":
+        handle_edit()
+    elif command == "history":
+        handle_history(sys.argv[2:])
     elif command == "help":
         show_help()
     else:
