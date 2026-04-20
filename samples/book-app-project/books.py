@@ -54,13 +54,14 @@ class BookCollection:
                 validated_books = []
                 for raw_book in data:
                     try:
-                        book = Book(**raw_book)
+                        if not isinstance(raw_book, dict):
+                            raise TypeError
                         validated_books.append(
                             Book(
-                                title=self._validate_text_field(book.title, "Title"),
-                                author=self._validate_text_field(book.author, "Author"),
-                                year=self._validate_year(book.year),
-                                read=book.read,
+                                title=self._validate_text_field(raw_book["title"], "Title"),
+                                author=self._validate_text_field(raw_book["author"], "Author"),
+                                year=self._validate_year(raw_book["year"]),
+                                read=bool(raw_book.get("read", False)),
                             )
                         )
                     except (TypeError, KeyError, ValueError):
