@@ -51,3 +51,43 @@ def test_remove_book_invalid():
     collection = BookCollection()
     result = collection.remove_book("Nonexistent Book")
     assert result is False
+
+
+def test_find_by_author_exact_match():
+    collection = BookCollection()
+    collection.add_book("1984", "George Orwell", 1949)
+    results = collection.find_by_author("George Orwell")
+    assert len(results) == 1
+    assert results[0].title == "1984"
+
+
+def test_find_by_author_partial_last_name():
+    collection = BookCollection()
+    collection.add_book("1984", "George Orwell", 1949)
+    results = collection.find_by_author("Orwell")
+    assert len(results) == 1
+    assert results[0].title == "1984"
+
+
+def test_find_by_author_partial_case_insensitive():
+    collection = BookCollection()
+    collection.add_book("1984", "George Orwell", 1949)
+    results = collection.find_by_author("orwell")
+    assert len(results) == 1
+    assert results[0].title == "1984"
+
+
+def test_find_by_author_no_match():
+    collection = BookCollection()
+    collection.add_book("1984", "George Orwell", 1949)
+    results = collection.find_by_author("Tolkien")
+    assert results == []
+
+
+def test_find_by_author_multiple_results():
+    collection = BookCollection()
+    collection.add_book("1984", "George Orwell", 1949)
+    collection.add_book("Animal Farm", "George Orwell", 1945)
+    collection.add_book("Dune", "Frank Herbert", 1965)
+    results = collection.find_by_author("Orwell")
+    assert len(results) == 2
