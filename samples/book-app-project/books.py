@@ -15,6 +15,8 @@ class Book:
 
 
 class BookCollection:
+    MAX_FIELD_LENGTH = 200
+
     @staticmethod
     def _validate_text_field(value: str, field_name: str) -> str:
         if not isinstance(value, str):
@@ -22,8 +24,8 @@ class BookCollection:
         cleaned = value.strip()
         if not cleaned:
             raise ValueError(f"{field_name} cannot be empty.")
-        if len(cleaned) > 200:
-            raise ValueError(f"{field_name} must be 200 characters or fewer.")
+        if len(cleaned) > BookCollection.MAX_FIELD_LENGTH:
+            raise ValueError(f"{field_name} must be {BookCollection.MAX_FIELD_LENGTH} characters or fewer.")
         if any(ord(char) < 32 for char in cleaned):
             raise ValueError(f"{field_name} contains invalid characters.")
         return cleaned
@@ -47,12 +49,12 @@ class BookCollection:
             with open(DATA_FILE, "r") as f:
                 data = json.load(f)
                 if not isinstance(data, list):
-                    print("Warning: data.json has an invalid format. Starting with empty collection.")
+                    print("Warning: data.json must contain a JSON array. Starting with empty collection.")
                     self.books = []
                     return
 
                 validated_books = []
-                for raw_book in data:
+                for index, raw_book in enumerate(data, start=1):
                     try:
                         if not isinstance(raw_book, dict):
                             raise TypeError
@@ -65,7 +67,7 @@ class BookCollection:
                             )
                         )
                     except (TypeError, KeyError, ValueError):
-                        print("Warning: Skipping invalid book entry in data.json.")
+                        print(f"Warning: Skipping invalid book entry #{index} in data.json.")
                 self.books = validated_books
         except FileNotFoundError:
             self.books = []
