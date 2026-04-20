@@ -1,5 +1,6 @@
 import sys
 import os
+import json
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import pytest
@@ -51,3 +52,35 @@ def test_remove_book_invalid():
     collection = BookCollection()
     result = collection.remove_book("Nonexistent Book")
     assert result is False
+
+
+def test_add_book_rejects_empty_fields():
+    collection = BookCollection()
+    with pytest.raises(ValueError):
+        collection.add_book("", "George Orwell", 1949)
+    with pytest.raises(ValueError):
+        collection.add_book("1984", "   ", 1949)
+
+
+def test_add_book_rejects_invalid_year():
+    collection = BookCollection()
+    with pytest.raises(ValueError):
+        collection.add_book("1984", "George Orwell", 0)
+    with pytest.raises(ValueError):
+        collection.add_book("1984", "George Orwell", -1)
+
+
+def test_load_books_skips_invalid_entries():
+    with open(books.DATA_FILE, "w") as f:
+        json.dump(
+            [
+                {"title": "Valid Book", "author": "Valid Author", "year": 2000},
+                {"title": "Missing Author", "year": 1990},
+                {"title": "", "author": "Invalid Author", "year": 1995},
+            ],
+            f,
+        )
+
+    collection = BookCollection()
+    assert len(collection.books) == 1
+    assert collection.books[0].title == "Valid Book"

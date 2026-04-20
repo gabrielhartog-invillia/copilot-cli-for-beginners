@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from dataclasses import dataclass, asdict
 from typing import List, Optional
 
@@ -14,6 +15,28 @@ class Book:
 
 
 class BookCollection:
+    @staticmethod
+    def _validate_text_field(value: str, field_name: str) -> str:
+        if not isinstance(value, str):
+            raise ValueError(f"{field_name} must be a string.")
+        cleaned = value.strip()
+        if not cleaned:
+            raise ValueError(f"{field_name} cannot be empty.")
+        if len(cleaned) > 200:
+            raise ValueError(f"{field_name} must be 200 characters or fewer.")
+        if any(ord(char) < 32 for char in cleaned):
+            raise ValueError(f"{field_name} contains invalid characters.")
+        return cleaned
+
+    @staticmethod
+    def _validate_year(year: int) -> int:
+        if not isinstance(year, int):
+            raise ValueError("Year must be an integer.")
+        current_year = datetime.now().year
+        if year < 1 or year > current_year:
+            raise ValueError(f"Year must be between 1 and {current_year}.")
+        return year
+
     def __init__(self):
         self.books: List[Book] = []
         self.load_books()
@@ -23,7 +46,26 @@ class BookCollection:
         try:
             with open(DATA_FILE, "r") as f:
                 data = json.load(f)
-                self.books = [Book(**b) for b in data]
+                if not isinstance(data, list):
+                    print("Warning: data.json has an invalid format. Starting with empty collection.")
+                    self.books = []
+                    return
+
+                validated_books = []
+                for raw_book in data:
+                    try:
+                        book = Book(**raw_book)
+                        validated_books.append(
+                            Book(
+                                title=self._validate_text_field(book.title, "Title"),
+                                author=self._validate_text_field(book.author, "Author"),
+                                year=self._validate_year(book.year),
+                                read=book.read,
+                            )
+                        )
+                    except (TypeError, KeyError, ValueError):
+                        print("Warning: Skipping invalid book entry in data.json.")
+                self.books = validated_books
         except FileNotFoundError:
             self.books = []
         except json.JSONDecodeError:
@@ -36,7 +78,10 @@ class BookCollection:
             json.dump([asdict(b) for b in self.books], f, indent=2)
 
     def add_book(self, title: str, author: str, year: int) -> Book:
-        book = Book(title=title, author=author, year=year)
+        validated_title = self._validate_text_field(title, "Title")
+        validated_author = self._validate_text_field(author, "Author")
+        validated_year = self._validate_year(year)
+        book = Book(title=validated_title, author=validated_author, year=validated_year)
         self.books.append(book)
         self.save_books()
         return book

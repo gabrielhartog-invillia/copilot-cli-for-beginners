@@ -34,7 +34,9 @@ def handle_add():
     year_str = input("Year: ").strip()
 
     try:
-        year = int(year_str) if year_str else 0
+        if not year_str:
+            raise ValueError("Year cannot be empty.")
+        year = int(year_str)
         collection.add_book(title, author, year)
         print("\nBook added successfully.\n")
     except ValueError as e:
