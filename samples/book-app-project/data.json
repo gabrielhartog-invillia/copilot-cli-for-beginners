@@ -28,5 +28,17 @@
     "author": "",
     "year": 0,
     "read": false
+  },
+  {
+    "title": "Ancient Book",
+    "author": "Unknown",
+    "year": 0,
+    "read": false
+  },
+  {
+    "title": "Future Book",
+    "author": "Unknown",
+    "year": 9999,
+    "read": false
   }
 ]
