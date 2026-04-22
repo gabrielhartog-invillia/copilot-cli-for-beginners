@@ -3,6 +3,8 @@ from dataclasses import dataclass, asdict
 from typing import List, Optional
 
 DATA_FILE = "data.json"
+# Block common shell metacharacters in user-provided text to reduce command-injection risk.
+FORBIDDEN_INPUT_CHARS = {";", "|", "&", "`", "$", ">", "<", "\n", "\r", "*", "?", "[", "]", "\\", "'", '"', "~"}
 
 
 @dataclass
@@ -36,6 +38,8 @@ class BookCollection:
             json.dump([asdict(b) for b in self.books], f, indent=2)
 
     def add_book(self, title: str, author: str, year: int) -> Book:
+        self._validate_text_input(title, "Title")
+        self._validate_text_input(author, "Author")
         book = Book(title=title, author=author, year=year)
         self.books.append(book)
         self.save_books()
@@ -45,6 +49,10 @@ class BookCollection:
         return self.books
 
     def find_book_by_title(self, title: str) -> Optional[Book]:
+        self._validate_text_input(title, "Title")
+        return self._find_book_by_title_internal(title)
+
+    def _find_book_by_title_internal(self, title: str) -> Optional[Book]:
         for book in self.books:
             if book.title.lower() == title.lower():
                 return book
@@ -60,7 +68,8 @@ class BookCollection:
 
     def remove_book(self, title: str) -> bool:
         """Remove a book by title."""
-        book = self.find_book_by_title(title)
+        self._validate_text_input(title, "Title")
+        book = self._find_book_by_title_internal(title)
         if book:
             self.books.remove(book)
             self.save_books()
@@ -69,4 +78,12 @@ class BookCollection:
 
     def find_by_author(self, author: str) -> List[Book]:
         """Find all books by a given author."""
+        self._validate_text_input(author, "Author")
         return [b for b in self.books if b.author.lower() == author.lower()]
+
+    @staticmethod
+    def _validate_text_input(value: str, field_name: str) -> None:
+        found = sorted({char for char in value if char in FORBIDDEN_INPUT_CHARS})
+        if found:
+            formatted = ", ".join(repr(char) for char in found)
+            raise ValueError(f"{field_name} contains forbidden characters: {formatted}")

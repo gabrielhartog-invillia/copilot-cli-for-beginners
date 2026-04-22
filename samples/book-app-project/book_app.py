@@ -45,18 +45,24 @@ def handle_remove():
     print("\nRemove a Book\n")
 
     title = input("Enter the title of the book to remove: ").strip()
-    collection.remove_book(title)
-
-    print("\nBook removed if it existed.\n")
+    try:
+        if collection.remove_book(title):
+            print("\nBook removed successfully.\n")
+        else:
+            print("\nBook not found.\n")
+    except ValueError as e:
+        print(f"\nError: {e}\n")
 
 
 def handle_find():
     print("\nFind Books by Author\n")
 
     author = input("Author name: ").strip()
-    books = collection.find_by_author(author)
-
-    show_books(books)
+    try:
+        books = collection.find_by_author(author)
+        show_books(books)
+    except ValueError as e:
+        print(f"\nError: {e}\n")
 
 
 def show_help():
