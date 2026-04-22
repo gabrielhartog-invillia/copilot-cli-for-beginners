@@ -28,5 +28,11 @@
     "author": "",
     "year": 0,
     "read": false
+  },
+  {
+    "title": "Clean Code",
+    "author": "Robert Cecil Martin",
+    "year": 2008,
+    "read": false
   }
 ]
