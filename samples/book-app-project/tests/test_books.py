@@ -73,3 +73,21 @@ def test_find_by_author_rejects_forbidden_characters():
     collection = BookCollection()
     with pytest.raises(ValueError, match="forbidden characters"):
         collection.find_by_author("Author|cat /etc/passwd")
+
+
+def test_find_book_by_title_rejects_forbidden_characters():
+    collection = BookCollection()
+    with pytest.raises(ValueError, match="forbidden characters"):
+        collection.find_book_by_title("Title; rm -rf /")
+
+
+def test_find_book_by_title_valid_input():
+    collection = BookCollection()
+    collection.add_book("Clean Code", "Robert C. Martin", 2008)
+    assert collection.find_book_by_title("Clean Code") is not None
+
+
+def test_add_book_rejects_forbidden_characters_in_author():
+    collection = BookCollection()
+    with pytest.raises(ValueError, match="forbidden characters"):
+        collection.add_book("Safe Title", "Author|cat /etc/passwd", 2024)

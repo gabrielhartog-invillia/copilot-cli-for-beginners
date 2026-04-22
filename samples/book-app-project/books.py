@@ -3,6 +3,7 @@ from dataclasses import dataclass, asdict
 from typing import List, Optional
 
 DATA_FILE = "data.json"
+# Block common shell metacharacters in user-provided text to reduce command-injection risk.
 FORBIDDEN_INPUT_CHARS = {";", "|", "&", "`", "$", ">", "<", "\n", "\r", "*", "?", "[", "]", "\\", "'", '"', "~"}
 
 
@@ -64,6 +65,7 @@ class BookCollection:
 
     def remove_book(self, title: str) -> bool:
         """Remove a book by title."""
+        self._validate_text_input(title, "Title")
         book = self.find_book_by_title(title)
         if book:
             self.books.remove(book)
