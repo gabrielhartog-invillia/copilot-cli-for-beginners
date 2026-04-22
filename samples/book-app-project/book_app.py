@@ -4,6 +4,13 @@ from books import BookCollection
 
 # Global collection instance
 collection = BookCollection()
+COMMAND_HANDLERS = {
+    "list": lambda: handle_list(),
+    "add": lambda: handle_add(),
+    "remove": lambda: handle_remove(),
+    "find": lambda: handle_find(),
+    "help": lambda: show_help(),
+}
 
 
 def show_books(books):
@@ -44,19 +51,23 @@ def handle_add():
 def handle_remove():
     print("\nRemove a Book\n")
 
-    title = input("Enter the title of the book to remove: ").strip()
-    collection.remove_book(title)
-
-    print("\nBook removed if it existed.\n")
+    try:
+        title = input("Enter the title of the book to remove: ").strip()
+        collection.remove_book(title)
+        print("\nBook removed if it existed.\n")
+    except ValueError as e:
+        print(f"\nError: {e}\n")
 
 
 def handle_find():
     print("\nFind Books by Author\n")
 
-    author = input("Author name: ").strip()
-    books = collection.find_by_author(author)
-
-    show_books(books)
+    try:
+        author = input("Author name: ").strip()
+        books = collection.find_by_author(author)
+        show_books(books)
+    except ValueError as e:
+        print(f"\nError: {e}\n")
 
 
 def show_help():
@@ -77,18 +88,10 @@ def main():
         show_help()
         return
 
-    command = sys.argv[1].lower()
-
-    if command == "list":
-        handle_list()
-    elif command == "add":
-        handle_add()
-    elif command == "remove":
-        handle_remove()
-    elif command == "find":
-        handle_find()
-    elif command == "help":
-        show_help()
+    command = sys.argv[1].strip().lower()
+    handler = COMMAND_HANDLERS.get(command)
+    if handler:
+        handler()
     else:
         print("Unknown command.\n")
         show_help()

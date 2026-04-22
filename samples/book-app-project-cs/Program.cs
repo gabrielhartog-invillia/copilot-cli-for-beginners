@@ -44,8 +44,19 @@ void HandleAdd()
 
     if (int.TryParse(yearStr, out var year))
     {
-        collection.AddBook(title, author, year);
-        Console.WriteLine("\nBook added successfully.\n");
+        try
+        {
+            collection.AddBook(title, author, year);
+            Console.WriteLine("\nBook added successfully.\n");
+        }
+        catch (ArgumentOutOfRangeException ex)
+        {
+            Console.WriteLine($"\nError: {ex.Message}\n");
+        }
+        catch (ArgumentException ex)
+        {
+            Console.WriteLine($"\nError: {ex.Message}\n");
+        }
     }
     else
     {
@@ -57,22 +68,34 @@ void HandleRemove()
 {
     Console.WriteLine("\nRemove a Book\n");
 
-    Console.Write("Enter the title of the book to remove: ");
-    var title = Console.ReadLine()?.Trim() ?? "";
-    collection.RemoveBook(title);
-
-    Console.WriteLine("\nBook removed if it existed.\n");
+    try
+    {
+        Console.Write("Enter the title of the book to remove: ");
+        var title = Console.ReadLine()?.Trim() ?? "";
+        collection.RemoveBook(title);
+        Console.WriteLine("\nBook removed if it existed.\n");
+    }
+    catch (ArgumentException ex)
+    {
+        Console.WriteLine($"\nError: {ex.Message}\n");
+    }
 }
 
 void HandleFind()
 {
     Console.WriteLine("\nFind Books by Author\n");
 
-    Console.Write("Author name: ");
-    var author = Console.ReadLine()?.Trim() ?? "";
-    var books = collection.FindByAuthor(author);
-
-    ShowBooks(books);
+    try
+    {
+        Console.Write("Author name: ");
+        var author = Console.ReadLine()?.Trim() ?? "";
+        var books = collection.FindByAuthor(author);
+        ShowBooks(books);
+    }
+    catch (ArgumentException ex)
+    {
+        Console.WriteLine($"\nError: {ex.Message}\n");
+    }
 }
 
 void ShowHelp()
@@ -96,7 +119,7 @@ if (args.Length == 0)
     return;
 }
 
-var command = args[0].ToLower();
+var command = args[0].Trim().ToLowerInvariant();
 
 switch (command)
 {

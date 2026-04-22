@@ -55,4 +55,20 @@ describe("BookCollection", () => {
     const result = collection.removeBook("Nonexistent Book");
     assert.equal(result, false);
   });
+
+  it("should reject forbidden characters in title", () => {
+    const collection = new BookCollection(tempFile);
+    assert.throws(
+      () => collection.addBook("1984; rm -rf /", "George Orwell", 1949),
+      /forbidden characters/,
+    );
+  });
+
+  it("should reject invalid year range", () => {
+    const collection = new BookCollection(tempFile);
+    assert.throws(
+      () => collection.addBook("1984", "George Orwell", -1),
+      /between 0 and 9999/,
+    );
+  });
 });

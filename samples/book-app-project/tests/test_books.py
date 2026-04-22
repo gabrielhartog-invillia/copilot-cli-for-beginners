@@ -51,3 +51,15 @@ def test_remove_book_invalid():
     collection = BookCollection()
     result = collection.remove_book("Nonexistent Book")
     assert result is False
+
+
+def test_add_book_rejects_forbidden_characters():
+    collection = BookCollection()
+    with pytest.raises(ValueError, match="forbidden characters"):
+        collection.add_book("1984; rm -rf /", "George Orwell", 1949)
+
+
+def test_add_book_rejects_invalid_year():
+    collection = BookCollection()
+    with pytest.raises(ValueError, match="between 0 and 9999"):
+        collection.add_book("1984", "George Orwell", -1)
