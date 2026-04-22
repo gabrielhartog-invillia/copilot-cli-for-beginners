@@ -3,6 +3,7 @@ from dataclasses import dataclass, asdict
 from typing import List, Optional
 
 DATA_FILE = "data.json"
+FORBIDDEN_INPUT_CHARS = {";", "|", "&", "`", "$", ">", "<", "\n", "\r", "*", "?", "[", "]", "\\", "'", '"', "~"}
 
 
 @dataclass
@@ -36,6 +37,8 @@ class BookCollection:
             json.dump([asdict(b) for b in self.books], f, indent=2)
 
     def add_book(self, title: str, author: str, year: int) -> Book:
+        self._validate_text_input(title, "Title")
+        self._validate_text_input(author, "Author")
         book = Book(title=title, author=author, year=year)
         self.books.append(book)
         self.save_books()
@@ -45,6 +48,7 @@ class BookCollection:
         return self.books
 
     def find_book_by_title(self, title: str) -> Optional[Book]:
+        self._validate_text_input(title, "Title")
         for book in self.books:
             if book.title.lower() == title.lower():
                 return book
@@ -69,4 +73,10 @@ class BookCollection:
 
     def find_by_author(self, author: str) -> List[Book]:
         """Find all books by a given author."""
+        self._validate_text_input(author, "Author")
         return [b for b in self.books if b.author.lower() == author.lower()]
+
+    @staticmethod
+    def _validate_text_input(value: str, field_name: str) -> None:
+        if any(char in value for char in FORBIDDEN_INPUT_CHARS):
+            raise ValueError(f"{field_name} contains forbidden characters.")

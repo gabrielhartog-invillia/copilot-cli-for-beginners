@@ -51,3 +51,25 @@ def test_remove_book_invalid():
     collection = BookCollection()
     result = collection.remove_book("Nonexistent Book")
     assert result is False
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        "test; rm -rf /",
+        "test|cat /etc/passwd",
+        "$(whoami)",
+        "`id`",
+        "book*",
+    ],
+)
+def test_add_book_rejects_forbidden_characters(payload):
+    collection = BookCollection()
+    with pytest.raises(ValueError, match="forbidden characters"):
+        collection.add_book(payload, "Author", 2024)
+
+
+def test_find_by_author_rejects_forbidden_characters():
+    collection = BookCollection()
+    with pytest.raises(ValueError, match="forbidden characters"):
+        collection.find_by_author("Author|cat /etc/passwd")
