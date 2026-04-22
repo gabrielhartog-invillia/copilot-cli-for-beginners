@@ -49,6 +49,10 @@ void HandleAdd()
             collection.AddBook(title, author, year);
             Console.WriteLine("\nBook added successfully.\n");
         }
+        catch (ArgumentOutOfRangeException ex)
+        {
+            Console.WriteLine($"\nError: {ex.Message}\n");
+        }
         catch (ArgumentException ex)
         {
             Console.WriteLine($"\nError: {ex.Message}\n");
