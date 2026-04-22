@@ -5,6 +5,7 @@ namespace BookApp.Services;
 
 public class BookCollection
 {
+    private static readonly char[] ForbiddenInputChars = [';', '|', '&', '`', '$', '>', '<', '\n', '\r'];
     private readonly string _dataFile;
     private List<Book> _books = [];
 
@@ -46,9 +47,40 @@ public class BookCollection
         File.WriteAllText(_dataFile, json);
     }
 
+    private static string ValidateTextInput(string value, string fieldName)
+    {
+        var cleanedValue = value.Trim();
+        if (cleanedValue.Length > 200)
+        {
+            throw new ArgumentException($"{fieldName} is too long.", fieldName);
+        }
+
+        if (cleanedValue.IndexOfAny(ForbiddenInputChars) >= 0)
+        {
+            throw new ArgumentException($"{fieldName} contains forbidden characters.", fieldName);
+        }
+
+        return cleanedValue;
+    }
+
+    private static int ValidateYear(int year)
+    {
+        if (year < 0 || year > 9999)
+        {
+            throw new ArgumentOutOfRangeException(nameof(year), "Year must be between 0 and 9999.");
+        }
+
+        return year;
+    }
+
     public Book AddBook(string title, string author, int year)
     {
-        var book = new Book { Title = title, Author = author, Year = year };
+        var book = new Book
+        {
+            Title = ValidateTextInput(title, nameof(title)),
+            Author = ValidateTextInput(author, nameof(author)),
+            Year = ValidateYear(year)
+        };
         _books.Add(book);
         SaveBooks();
         return book;
@@ -58,7 +90,8 @@ public class BookCollection
 
     public Book? FindBookByTitle(string title)
     {
-        return _books.Find(b => b.Title.Equals(title, StringComparison.OrdinalIgnoreCase));
+        var safeTitle = ValidateTextInput(title, nameof(title));
+        return _books.Find(b => b.Title.Equals(safeTitle, StringComparison.OrdinalIgnoreCase));
     }
 
     public bool MarkAsRead(string title)
@@ -72,7 +105,8 @@ public class BookCollection
 
     public bool RemoveBook(string title)
     {
-        var book = FindBookByTitle(title);
+        var safeTitle = ValidateTextInput(title, nameof(title));
+        var book = FindBookByTitle(safeTitle);
         if (book is null) return false;
         _books.Remove(book);
         SaveBooks();
@@ -81,8 +115,9 @@ public class BookCollection
 
     public List<Book> FindByAuthor(string author)
     {
+        var safeAuthor = ValidateTextInput(author, nameof(author));
         return _books
-            .Where(b => b.Author.Equals(author, StringComparison.OrdinalIgnoreCase))
+            .Where(b => b.Author.Equals(safeAuthor, StringComparison.OrdinalIgnoreCase))
             .ToList();
     }
 }

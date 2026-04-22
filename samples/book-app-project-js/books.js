@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 
 const DATA_FILE = path.join(__dirname, "data.json");
+const FORBIDDEN_INPUT_CHARS = /[;|&`$><\n\r]/;
 
 class Book {
   constructor(title, author, year, read = false) {
@@ -46,8 +47,37 @@ class BookCollection {
     fs.writeFileSync(this.dataFile, JSON.stringify(data, null, 2));
   }
 
+  static validateTextInput(value, fieldName) {
+    if (typeof value !== "string") {
+      throw new Error(`${fieldName} must be a string.`);
+    }
+
+    const cleanedValue = value.trim();
+    if (cleanedValue.length > 200) {
+      throw new Error(`${fieldName} is too long.`);
+    }
+    if (FORBIDDEN_INPUT_CHARS.test(cleanedValue)) {
+      throw new Error(`${fieldName} contains forbidden characters.`);
+    }
+
+    return cleanedValue;
+  }
+
+  static validateYear(year) {
+    if (!Number.isInteger(year)) {
+      throw new Error("Year must be an integer.");
+    }
+    if (year < 0 || year > 9999) {
+      throw new Error("Year must be between 0 and 9999.");
+    }
+    return year;
+  }
+
   addBook(title, author, year) {
-    const book = new Book(title, author, year);
+    const safeTitle = BookCollection.validateTextInput(title, "Title");
+    const safeAuthor = BookCollection.validateTextInput(author, "Author");
+    const safeYear = BookCollection.validateYear(year);
+    const book = new Book(safeTitle, safeAuthor, safeYear);
     this.books.push(book);
     this.saveBooks();
     return book;
@@ -58,7 +88,8 @@ class BookCollection {
   }
 
   findBookByTitle(title) {
-    return this.books.find((b) => b.title.toLowerCase() === title.toLowerCase()) || null;
+    const safeTitle = BookCollection.validateTextInput(title, "Title");
+    return this.books.find((b) => b.title.toLowerCase() === safeTitle.toLowerCase()) || null;
   }
 
   markAsRead(title) {
@@ -72,7 +103,8 @@ class BookCollection {
   }
 
   removeBook(title) {
-    const book = this.findBookByTitle(title);
+    const safeTitle = BookCollection.validateTextInput(title, "Title");
+    const book = this.findBookByTitle(safeTitle);
     if (book) {
       this.books = this.books.filter((b) => b !== book);
       this.saveBooks();
@@ -82,7 +114,8 @@ class BookCollection {
   }
 
   findByAuthor(author) {
-    return this.books.filter((b) => b.author.toLowerCase() === author.toLowerCase());
+    const safeAuthor = BookCollection.validateTextInput(author, "Author");
+    return this.books.filter((b) => b.author.toLowerCase() === safeAuthor.toLowerCase());
   }
 }
 

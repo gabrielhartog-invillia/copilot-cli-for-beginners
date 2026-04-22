@@ -67,4 +67,18 @@ public class BookCollectionTests : IDisposable
         var result = _collection.RemoveBook("Nonexistent Book");
         Assert.False(result);
     }
+
+    [Fact]
+    public void AddBook_WithForbiddenCharacters_ShouldThrow()
+    {
+        var ex = Assert.Throws<ArgumentException>(() => _collection.AddBook("1984; rm -rf /", "George Orwell", 1949));
+        Assert.Contains("forbidden characters", ex.Message);
+    }
+
+    [Fact]
+    public void AddBook_WithInvalidYear_ShouldThrow()
+    {
+        var ex = Assert.Throws<ArgumentOutOfRangeException>(() => _collection.AddBook("1984", "George Orwell", -1));
+        Assert.Contains("between 0 and 9999", ex.Message);
+    }
 }

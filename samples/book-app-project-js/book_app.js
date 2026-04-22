@@ -58,19 +58,26 @@ async function handleAdd() {
 
 function handleRemove() {
   return prompt("Enter the title of the book to remove: ").then((title) => {
-    console.log("\nRemove a Book\n");
-    collection.removeBook(title);
-    console.log("\nBook removed if it existed.\n");
+    try {
+      console.log("\nRemove a Book\n");
+      collection.removeBook(title);
+      console.log("\nBook removed if it existed.\n");
+    } catch (err) {
+      console.log(`\nError: ${err.message}\n`);
+    }
   });
 }
 
 async function handleFind() {
   console.log("\nFind Books by Author\n");
 
-  const author = await prompt("Author name: ");
-  const books = collection.findByAuthor(author);
-
-  showBooks(books);
+  try {
+    const author = await prompt("Author name: ");
+    const books = collection.findByAuthor(author);
+    showBooks(books);
+  } catch (err) {
+    console.log(`\nError: ${err.message}\n`);
+  }
 }
 
 function showHelp() {
@@ -88,34 +95,27 @@ Commands:
 
 async function main() {
   const args = process.argv.slice(2);
+  const commandHandlers = {
+    list: async () => handleList(),
+    add: handleAdd,
+    remove: handleRemove,
+    find: handleFind,
+    help: async () => showHelp(),
+  };
 
   if (args.length === 0) {
     showHelp();
     return;
   }
 
-  const command = args[0].toLowerCase();
+  const command = args[0].trim().toLowerCase();
+  const handler = commandHandlers[command];
 
-  switch (command) {
-    case "list":
-      handleList();
-      break;
-    case "add":
-      await handleAdd();
-      break;
-    case "remove":
-      await handleRemove();
-      break;
-    case "find":
-      await handleFind();
-      break;
-    case "help":
-      showHelp();
-      break;
-    default:
-      console.log("Unknown command.\n");
-      showHelp();
-      break;
+  if (handler) {
+    await handler();
+  } else {
+    console.log("Unknown command.\n");
+    showHelp();
   }
 }
 
