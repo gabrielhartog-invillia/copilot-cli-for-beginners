@@ -46,8 +46,10 @@ def handle_remove():
 
     title = input("Enter the title of the book to remove: ").strip()
     try:
-        collection.remove_book(title)
-        print("\nBook removed if it existed.\n")
+        if collection.remove_book(title):
+            print("\nBook removed successfully.\n")
+        else:
+            print("\nBook not found.\n")
     except ValueError as e:
         print(f"\nError: {e}\n")
 
