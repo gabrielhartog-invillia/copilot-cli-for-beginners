@@ -50,9 +50,9 @@ class BookCollection:
 
     def find_book_by_title(self, title: str) -> Optional[Book]:
         self._validate_text_input(title, "Title")
-        return self._find_book_by_title_unchecked(title)
+        return self._find_book_by_title_internal(title)
 
-    def _find_book_by_title_unchecked(self, title: str) -> Optional[Book]:
+    def _find_book_by_title_internal(self, title: str) -> Optional[Book]:
         for book in self.books:
             if book.title.lower() == title.lower():
                 return book
@@ -69,7 +69,7 @@ class BookCollection:
     def remove_book(self, title: str) -> bool:
         """Remove a book by title."""
         self._validate_text_input(title, "Title")
-        book = self._find_book_by_title_unchecked(title)
+        book = self._find_book_by_title_internal(title)
         if book:
             self.books.remove(book)
             self.save_books()
@@ -83,5 +83,7 @@ class BookCollection:
 
     @staticmethod
     def _validate_text_input(value: str, field_name: str) -> None:
-        if any(char in value for char in FORBIDDEN_INPUT_CHARS):
-            raise ValueError(f"{field_name} contains forbidden characters.")
+        found = sorted({char for char in value if char in FORBIDDEN_INPUT_CHARS})
+        if found:
+            formatted = ", ".join(repr(char) for char in found)
+            raise ValueError(f"{field_name} contains forbidden characters: {formatted}")
