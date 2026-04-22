@@ -103,8 +103,7 @@ class BookCollection {
   }
 
   removeBook(title) {
-    const safeTitle = BookCollection.validateTextInput(title, "Title");
-    const book = this.findBookByTitle(safeTitle);
+    const book = this.findBookByTitle(title);
     if (book) {
       this.books = this.books.filter((b) => b !== book);
       this.saveBooks();

@@ -105,8 +105,7 @@ public class BookCollection
 
     public bool RemoveBook(string title)
     {
-        var safeTitle = ValidateTextInput(title, nameof(title));
-        var book = FindBookByTitle(safeTitle);
+        var book = FindBookByTitle(title);
         if (book is null) return false;
         _books.Remove(book);
         SaveBooks();
