@@ -65,7 +65,6 @@ class BookCollection:
 
     def remove_book(self, title: str) -> bool:
         """Remove a book by title."""
-        self._validate_text_input(title, "Title")
         book = self.find_book_by_title(title)
         if book:
             self.books.remove(book)
