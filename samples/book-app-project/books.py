@@ -50,6 +50,9 @@ class BookCollection:
 
     def find_book_by_title(self, title: str) -> Optional[Book]:
         self._validate_text_input(title, "Title")
+        return self._find_book_by_title_unchecked(title)
+
+    def _find_book_by_title_unchecked(self, title: str) -> Optional[Book]:
         for book in self.books:
             if book.title.lower() == title.lower():
                 return book
@@ -65,7 +68,8 @@ class BookCollection:
 
     def remove_book(self, title: str) -> bool:
         """Remove a book by title."""
-        book = self.find_book_by_title(title)
+        self._validate_text_input(title, "Title")
+        book = self._find_book_by_title_unchecked(title)
         if book:
             self.books.remove(book)
             self.save_books()

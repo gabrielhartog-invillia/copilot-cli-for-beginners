@@ -91,3 +91,9 @@ def test_add_book_rejects_forbidden_characters_in_author():
     collection = BookCollection()
     with pytest.raises(ValueError, match="forbidden characters"):
         collection.add_book("Safe Title", "Author|cat /etc/passwd", 2024)
+
+
+def test_remove_book_rejects_forbidden_characters():
+    collection = BookCollection()
+    with pytest.raises(ValueError, match="forbidden characters"):
+        collection.remove_book("Title; rm -rf /")
