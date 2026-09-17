@@ -41,13 +41,16 @@ def handle_add():
         print(f"\nError: {e}\n")
 
 
-def handle_remove():
+def handle_remove() -> None:
     print("\nRemove a Book\n")
 
     title = input("Enter the title of the book to remove: ").strip()
-    collection.remove_book(title)
+    was_removed = collection.remove_book(title)
 
-    print("\nBook removed if it existed.\n")
+    if was_removed:
+        print(f"\nBook '{title}' removed.\n")
+    else:
+        print(f"\nNo book found with title '{title}'.\n")
 
 
 def handle_find():
