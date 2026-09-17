@@ -32,6 +32,46 @@ These patterns were mined from actual PR review feedback and represent recurring
 - **Python version**: 3.10+ (per `samples/book-app-project/pyproject.toml`).
 - **Intentional bugs**: Files in `samples/book-app-buggy/` and `samples/buggy-code/` contain **deliberate bugs** for exercises. Never fix them.
 
+## Build, Test, and Lint Commands
+
+Run commands from the repository root unless a different directory is shown.
+
+### Course content and demos
+
+```bash
+npm install
+npm run release
+```
+
+`npm run release` runs the demo tape generation and GIF verification pipeline. The
+individual scripts are available in `package.json` when only one pipeline step is
+needed. There is no repository-wide lint script.
+
+### Primary Python sample
+
+```bash
+cd samples/book-app-project
+python -m pytest
+python -m pytest tests/test_books.py::test_add_book
+python -m pytest tests/test_book_app.py::test_read_command_marks_book_as_read
+python book_app.py help
+```
+
+The Python sample uses `pytest`; its tests replace `books.DATA_FILE` with a
+temporary path, so tests should not modify the checked-in `data.json`.
+
+### JavaScript and C# samples
+
+```bash
+cd samples/book-app-project-js
+npm test
+node --test --test-name-pattern="should add a book" tests/test_books.js
+
+cd ../book-app-project-cs
+dotnet test Tests/BookApp.Tests.csproj
+dotnet test Tests/BookApp.Tests.csproj --filter "FullyQualifiedName~BookCollectionTests"
+```
+
 ## Chapter Structure
 
 Every chapter (00–07) follows the same pattern in its `README.md`:
@@ -43,6 +83,27 @@ Every chapter (00–07) follows the same pattern in its `README.md`:
 5. What's Next
 
 Do not deviate from this structure when editing or adding chapter content.
+
+## Architecture
+
+This repository is courseware organized around a single learning path, not one
+production application. The root README links chapters `00` through `07`; each
+chapter combines an analogy, concepts, runnable hands-on examples, an assignment,
+and a next step. The chapters use the Python book app as the primary example and
+refer to parallel C# and JavaScript ports where language comparison is useful.
+
+The book app has the same two-layer shape in each language: a CLI entry point
+handles commands and user interaction, while a collection/data module owns book
+operations and JSON persistence. The Python version is in
+`samples/book-app-project/`, with `book_app.py` as the CLI, `books.py` as the
+domain and persistence layer, `data.json` as sample state, and pytest tests under
+`tests/`. The C# and JavaScript directories mirror this separation with their
+language-specific test frameworks.
+
+The `.github/scripts/` directory supports the course publishing workflow. The
+root npm scripts generate chapter headers and terminal demos; generated demo
+assets and source tapes are part of the teaching material, so check the relevant
+chapter and asset references when changing demo commands.
 
 ## Markdown Formatting
 

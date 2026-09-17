@@ -78,6 +78,20 @@ def handle_find(args=None):
     show_books(books)
 
 
+def handle_read(args: list[str] | None = None) -> None:
+    print("\nMark a Book as Read\n")
+
+    if args and len(args) >= 1:
+        title = args[0].strip()
+    else:
+        title = input("Enter the title of the book to mark as read: ").strip()
+
+    if collection.mark_as_read(title):
+        print(f"\nBook '{title}' marked as read.\n")
+    else:
+        print(f"\nNo book found with title '{title}'.\n")
+
+
 def show_help():
     print("""
 Book Collection Helper
@@ -87,6 +101,7 @@ Commands:
   add [title] [author] [year]   - Add a new book (prompts if omitted)
   remove [title]                - Remove a book by title (prompts if omitted)
   find [author]                 - Find books by author (prompts if omitted)
+  read [title]                  - Mark a book as read (prompts if omitted)
   help                          - Show this help message
 """)
 
@@ -107,6 +122,8 @@ def main():
         handle_remove(args)
     elif command == "find":
         handle_find(args)
+    elif command == "read":
+        handle_read(args)
     elif command == "help":
         show_help()
     else:

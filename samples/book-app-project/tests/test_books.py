@@ -39,6 +39,16 @@ def test_mark_book_as_read_invalid():
     result = collection.mark_as_read("Nonexistent Book")
     assert result is False
 
+def test_mark_book_as_read_persists_change():
+    collection = BookCollection()
+    collection.add_book("Dune", "Frank Herbert", 1965)
+    collection.mark_as_read("Dune")
+
+    reloaded_collection = BookCollection()
+    book = reloaded_collection.find_book_by_title("Dune")
+    assert book is not None
+    assert book.read is True
+
 def test_remove_book():
     collection = BookCollection()
     collection.add_book("The Hobbit", "J.R.R. Tolkien", 1937)
