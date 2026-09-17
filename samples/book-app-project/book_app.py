@@ -26,34 +26,53 @@ def handle_list():
     show_books(books)
 
 
-def handle_add():
+def handle_add(args=None):
     print("\nAdd a New Book\n")
 
-    title = input("Title: ").strip()
-    author = input("Author: ").strip()
-    year_str = input("Year: ").strip()
+    if args and len(args) >= 2:
+        title = args[0].strip()
+        author = args[1].strip()
+        year_str = args[2].strip() if len(args) >= 3 else ""
+    else:
+        title = input("Title: ").strip()
+        author = input("Author: ").strip()
+        year_str = input("Year: ").strip()
 
     try:
-        year = int(year_str) if year_str else 0
+        if not year_str:
+            raise ValueError("Year cannot be empty")
+        try:
+            year = int(year_str)
+        except ValueError:
+            raise ValueError("Year must be a valid integer")
+
         collection.add_book(title, author, year)
         print("\nBook added successfully.\n")
     except ValueError as e:
         print(f"\nError: {e}\n")
 
 
-def handle_remove():
+def handle_remove(args=None):
     print("\nRemove a Book\n")
 
-    title = input("Enter the title of the book to remove: ").strip()
+    if args and len(args) >= 1:
+        title = args[0].strip()
+    else:
+        title = input("Enter the title of the book to remove: ").strip()
+
     collection.remove_book(title)
 
     print("\nBook removed if it existed.\n")
 
 
-def handle_find():
+def handle_find(args=None):
     print("\nFind Books by Author\n")
 
-    author = input("Author name: ").strip()
+    if args and len(args) >= 1:
+        author = args[0].strip()
+    else:
+        author = input("Author name: ").strip()
+
     books = collection.find_by_author(author)
 
     show_books(books)
@@ -64,11 +83,11 @@ def show_help():
 Book Collection Helper
 
 Commands:
-  list     - Show all books
-  add      - Add a new book
-  remove   - Remove a book by title
-  find     - Find books by author
-  help     - Show this help message
+  list                          - Show all books
+  add [title] [author] [year]   - Add a new book (prompts if omitted)
+  remove [title]                - Remove a book by title (prompts if omitted)
+  find [author]                 - Find books by author (prompts if omitted)
+  help                          - Show this help message
 """)
 
 
@@ -78,15 +97,16 @@ def main():
         return
 
     command = sys.argv[1].lower()
+    args = sys.argv[2:]
 
     if command == "list":
         handle_list()
     elif command == "add":
-        handle_add()
+        handle_add(args)
     elif command == "remove":
-        handle_remove()
+        handle_remove(args)
     elif command == "find":
-        handle_find()
+        handle_find(args)
     elif command == "help":
         show_help()
     else:
